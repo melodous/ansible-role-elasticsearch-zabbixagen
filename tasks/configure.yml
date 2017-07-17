@@ -11,7 +11,7 @@
     log_options:
       max-file: "1"
       max-size: "20m"
-    labels: "{{ grafana_docker_labels }}"
+    labels: "{{ elasticsearch_zabbixagent_docker_labels }}"
     env:
       ZBX_LISTENPORT: "{{ elasticsearch_zabbixagent_port }}"
       ZBX_SERVER_HOST: "{{ elasticsearch_zabbixagent_server }}"
