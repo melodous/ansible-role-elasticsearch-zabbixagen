@@ -1,0 +1,36 @@
+---
+- name: Start elasticsearch_zabbixagent containers
+  docker_container:
+    name: elasticsearch_zabbixagent
+    image: "{{ elasticsearch_zabbixagent_docker_image }}:{{ elasticsearch_zabbixagent_version }}"
+    network_mode: host
+    state: present
+    restart_policy: unless-stopped
+    restart_retries: 3
+    log_driver: json-file
+    log_options:
+      max-file: "1"
+      max-size: "20m"
+    labels: "{{ grafana_docker_labels }}"
+    env:
+      ZBX_LISTENPORT: "{{ elasticsearch_zabbixagent_port }}"
+      ZBX_SERVER_HOST: "{{ elasticsearch_zabbixagent_server }}"
+      ZBX_HOSTNAME: "{{ elasticsearch_zabbixagent_hostname }}"
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/localtime:/etc/localtime
+
+- name: Create init-script rhel6
+  copy: src=elasticsearch_zabbixagent_rhel6 dest=/etc/init.d/elasticsearch_zabbixagent owner=root group=root mode=0755
+  when:
+    ansible_distribution_major_version|int < 7
+    and ansible_os_family == 'RedHat'
+
+- name: Create init-script rhel7
+  copy: src=elasticsearch_zabbixagent_rhel7 dest=/usr/lib/systemd/system/elasticsearch_zabbixagent.service owner=root group=root mode=0644
+  when:
+    ansible_distribution_major_version|int > 6
+    and ansible_os_family == 'RedHat'
+
+- name: Enable init-scripts
+  service: name=elasticsearch_zabbixagent enabled=yes state=started

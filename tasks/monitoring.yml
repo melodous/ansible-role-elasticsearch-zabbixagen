@@ -1,0 +1,12 @@
+---
+- name: reload facts
+  setup: filter='*'
+
+- name: Create zabbix agent dir for scripts
+  file: path=/etc/zabbix/script/elasticsearch_zabbixagent state=directory mode=755 owner=root group=root
+
+- name: Copy redis scripts for monitoring
+  copy: src=elasticsearch_zabbixagent_zabbix dest=/etc/zabbix/script/elasticsearch_zabbixagent/elasticsearch_zabbixagent_zabbix mode=755 owner=root group=root
+
+- name: Add crontab to elasticsearch_zabbixagent monitoring
+  cron: name="RunDeck Zabbix sender" minute=*/5 cron_file=zabbix user=zabbix job="/etc/zabbix/script/elasticsearch_zabbixagent/elasticsearch_zabbixagent_zabbix --zabbix {{ zabbix_server }}"
